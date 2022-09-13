@@ -27,10 +27,11 @@ def student_factory():
 def test_get_course(client, student_factory, course_factory):
     students = student_factory(_quantity=1)
     courses = course_factory(_quantity=1, make_m2m=True)
-    response = client.get('/api/v1/courses/')
+    course_id = courses[0].pk
+    response = client.get(f'/api/v1/courses/{course_id}/')
     data = response.json()
     assert response.status_code == 200
-    assert data[0]['name'] == courses[0].name
+    assert data['name'] == courses[0].name
 
 
 @pytest.mark.django_db
@@ -49,11 +50,12 @@ def test_get_list_courses(client, student_factory, course_factory):
 def test_filter_id(client, student_factory, course_factory):
     students = student_factory(_quantity=5)
     courses = course_factory(_quantity=5, make_m2m=True)
-    response = client.get('/api/v1/courses/?id=8')
+    course_id = courses[0].pk
+    response = client.get(f'/api/v1/courses/?id={course_id}')
     data = response.json()
     assert response.status_code == 200
     assert len(data) == 1
-    assert data[0]['name'] == courses[1].name
+    assert data[0]['name'] == courses[0].name
 
 
 @pytest.mark.django_db
@@ -81,9 +83,10 @@ def test_post_course(client):
 def test_patch_course(client, student_factory, course_factory):
     students = student_factory(_quantity=1)
     courses = course_factory(_quantity=1, make_m2m=True)
+    course_id = courses[0].pk
     count = Course.objects.count()
     dt = {'name': 'IT'}
-    response = client.patch('/api/v1/courses/18/', data=dt)
+    response = client.patch(f'/api/v1/courses/{course_id}/', data=dt)
     data = response.json()
     assert response.status_code == 200
     assert Course.objects.count() == count
@@ -94,8 +97,9 @@ def test_patch_course(client, student_factory, course_factory):
 def test_delete_course(client, student_factory, course_factory):
     students = student_factory(_quantity=1)
     courses = course_factory(_quantity=1, make_m2m=True)
+    course_id = courses[0].pk
     count = Course.objects.count()
-    response = client.delete('/api/v1/courses/19/')
+    response = client.delete(f'/api/v1/courses/{course_id}/')
     assert response.status_code == 204
     assert Course.objects.count() == count - 1
 
